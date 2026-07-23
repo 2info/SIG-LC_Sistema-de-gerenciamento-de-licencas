@@ -1,70 +1,323 @@
-# SIG-LC_Sistema-de-gerenciamento-de-licencas
-SIG-LC — Sistema Integrado de Gestão de Licença Capacitação (MVP)
+# SIG-LC — Sistema Integrado de Gestão de Licença Capacitação (MVP)
 
-Backoffice para automatizar a concessão de Licença Capacitação conforme Decreto 9.991/2019 e IN 21/2021. Veja docs/ARQUITETURA.md para detalhes de design.
+Backoffice para automatizar a concessão de **Licença Capacitação**, conforme o **Decreto nº 9.991/2019** e a **Instrução Normativa nº 21/2021**.
 
-Pré-requisitos
-Node.js 18+
-Docker (para o PostgreSQL local) — ou um Postgres 15+ já disponível
-1. Subir o banco de dados
-bash
+> Consulte o arquivo **`docs/ARQUITETURA.md`** para informações detalhadas sobre a arquitetura e o design do sistema.
+
+---
+
+# Pré-requisitos
+
+Antes de iniciar, certifique-se de possuir instalado:
+
+- **Node.js 18+**
+- **Docker** (para executar um PostgreSQL local)
+  - ou um **PostgreSQL 15+** já disponível.
+
+---
+
+# Instalação
+
+## 1. Subir o banco de dados
+
+Execute:
+
+```bash
 docker-compose up -d
+```
 
-Isso levanta um PostgreSQL em localhost:5432 com as credenciais definidas em docker-compose.yml.
+Este comando iniciará um container PostgreSQL disponível em:
 
-2. Configurar variáveis de ambiente
-bash
+```
+localhost:5432
+```
+
+Utilizando as credenciais definidas no arquivo:
+
+```
+docker-compose.yml
+```
+
+---
+
+## 2. Configurar as variáveis de ambiente
+
+Copie o arquivo de exemplo:
+
+```bash
 cp .env.example .env
-# ajuste DATABASE_URL se necessário
-3. Instalar dependências
-bash
+```
+
+Em seguida, ajuste a variável:
+
+```env
+DATABASE_URL=
+```
+
+caso seja necessário.
+
+---
+
+## 3. Instalar as dependências
+
+```bash
 npm install
-4. Aplicar o schema no banco
+```
 
-Opção A — via Prisma Migrate (recomendado, gera histórico de migrações):
+---
 
-bash
+## 4. Criar o banco de dados
+
+Existem duas opções.
+
+### Opção A — Prisma Migrate (Recomendado)
+
+Gera automaticamente o histórico de migrações.
+
+```bash
 npm run prisma:migrate
 npm run prisma:generate
+```
 
-Opção B — aplicar o DDL puro (se preferir não usar Prisma Migrate):
+---
 
-bash
+### Opção B — Aplicar o DDL manualmente
+
+Caso prefira não utilizar o Prisma Migrate:
+
+```bash
 psql "$DATABASE_URL" -f db/schema.sql
 npm run prisma:generate
-5. Rodar o backend
-bash
+```
+
+---
+
+## 5. Executar o backend
+
+```bash
 npm run dev
+```
 
-A API sobe em http://localhost:3333. Teste com:
+A API será iniciada em:
 
-bash
+```
+http://localhost:3333
+```
+
+Verifique se está funcionando:
+
+```bash
 curl http://localhost:3333/health
-6. Rodar os testes do Motor de Regras
-bash
+```
+
+---
+
+## 6. Executar os testes
+
+Para validar o Motor de Regras:
+
+```bash
 npm test
-7. Rodar o job de notificação manualmente (sem esperar o cron)
-bash
+```
+
+---
+
+## 7. Executar o Job de Notificações
+
+Sem aguardar o cron:
+
+```bash
 npm run job:notificacao
+```
 
-Em produção, chame iniciarAgendamento() (exportado de src/jobs/notificacaoJob.ts) na inicialização do processo worker, ou agende via cron do SO / scheduler do orquestrador (ex: Kubernetes CronJob) apontando para npm run job:notificacao.
+### Produção
 
-8. Frontend
+Na inicialização do processo **worker**, execute:
 
-Os componentes em frontend/components/ (DashboardOcupacao.tsx, GanttServidores.tsx, FormularioValidacao.tsx) foram escritos para rodar dentro de um projeto React + Tailwind já existente (ex: criado com Vite):
+```ts
+iniciarAgendamento()
+```
 
-bash
+Exportado em:
+
+```
+src/jobs/notificacaoJob.ts
+```
+
+Também é possível utilizar:
+
+- Cron do Sistema Operacional;
+- Kubernetes CronJob;
+- outro scheduler de sua infraestrutura,
+
+apontando para:
+
+```bash
+npm run job:notificacao
+```
+
+---
+
+# Frontend
+
+Os componentes presentes em:
+
+```
+frontend/components/
+```
+
+foram desenvolvidos para utilização em um projeto **React + Tailwind CSS**.
+
+Arquivos disponíveis:
+
+- DashboardOcupacao.tsx
+- GanttServidores.tsx
+- FormularioValidacao.tsx
+
+## Criando um projeto React
+
+```bash
 npm create vite@latest sig-lc-frontend -- --template react-ts
+
 cd sig-lc-frontend
+
 npm install -D tailwindcss postcss autoprefixer
+
 npx tailwindcss init -p
-# configure tailwind.config.js (content: ["./src/**/*.{ts,tsx}"])
-# copie a pasta frontend/components e frontend/mocks para src/
+```
 
-FormularioValidacao.tsx está com MODO_DEMO = true para funcionar sem backend; mude para false ao integrar com a API real (POST /solicitar-licenca).
+Configure o arquivo:
 
-Endpoints disponíveis
-Método	Rota	Descrição
-POST	/solicitar-licenca	Valida e cria uma solicitação de licença
-GET	/ocupacao-diaria	Retorna ocupação diária por lotação/mês (heatmap)
-GET	/health	Health check
+```js
+tailwind.config.js
+```
+
+Incluindo:
+
+```js
+content: ["./src/**/*.{ts,tsx}"]
+```
+
+Depois copie para:
+
+```
+src/
+```
+
+as pastas:
+
+```
+frontend/components
+frontend/mocks
+```
+
+---
+
+## Modo Demonstração
+
+O componente:
+
+```
+FormularioValidacao.tsx
+```
+
+possui:
+
+```ts
+MODO_DEMO = true
+```
+
+Assim ele funciona sem backend.
+
+Quando integrar com a API real, altere para:
+
+```ts
+MODO_DEMO = false
+```
+
+A integração utiliza o endpoint:
+
+```
+POST /solicitar-licenca
+```
+
+---
+
+# Endpoints da API
+
+| Método | Endpoint | Descrição |
+|---------|----------|-----------|
+| **POST** | `/solicitar-licenca` | Valida e cria uma solicitação de Licença Capacitação |
+| **GET** | `/ocupacao-diaria` | Retorna a ocupação diária por lotação e mês (heatmap) |
+| **GET** | `/health` | Endpoint para verificação de disponibilidade da API |
+
+---
+
+# Tecnologias Utilizadas
+
+- Node.js 18+
+- TypeScript
+- Express
+- Prisma ORM
+- PostgreSQL
+- Docker
+- React
+- Tailwind CSS
+- Vite
+
+---
+
+# Estrutura do Projeto
+
+```text
+SIG-LC/
+│
+├── docs/
+│   └── ARQUITETURA.md
+│
+├── db/
+│   └── schema.sql
+│
+├── frontend/
+│   ├── components/
+│   └── mocks/
+│
+├── src/
+│   ├── jobs/
+│   ├── controllers/
+│   ├── services/
+│   ├── routes/
+│   └── ...
+│
+├── docker-compose.yml
+├── package.json
+├── .env.example
+└── README.md
+```
+
+---
+
+# Health Check
+
+Após iniciar o sistema:
+
+```bash
+curl http://localhost:3333/health
+```
+
+Resposta esperada:
+
+```json
+{
+  "status": "ok"
+}
+```
+
+---
+
+# Licença
+
+Projeto desenvolvido para automatizar a gestão de **Licença Capacitação** conforme:
+
+- Decreto nº 9.991/2019
+- Instrução Normativa nº 21/2021
