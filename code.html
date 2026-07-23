@@ -1,0 +1,957 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SIG-LC — Gestão de Licença Capacitação</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Carregando ícones Phosphor para substituir Lucide-React -->
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@500;600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --paper: #F4F5F2;
+      --ink: #16232E;
+      --navy: #16324F;
+      --navy-deep: #0D2036;
+      --gold: #93650F;
+      --emerald: #1F7A5C;
+      --amber: #B5760A;
+      --red: #B3261E;
+      --line: #DADFE3;
+    }
+    body {
+      background-color: var(--paper);
+      color: var(--ink);
+      font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
+    }
+    .siglc-serif { font-family: "Source Serif 4", Georgia, "Times New Roman", serif; }
+    .siglc-mono { font-family: "IBM Plex Mono", ui-monospace, "SF Mono", monospace; }
+    .siglc-sans { font-family: Inter, ui-sans-serif, system-ui, -apple-system, sans-serif; }
+    
+    /* Utility class for hiding elements */
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+
+  <div class="min-h-screen flex flex-col">
+    <!-- Cabeçalho institucional -->
+    <header style="background: var(--navy-deep)">
+      <div class="max-w-6xl mx-auto px-6 py-5 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-sm border flex items-center justify-center" style="border-color: var(--gold)">
+            <i class="ph ph-stamp text-lg" style="color: var(--gold)"></i>
+          </div>
+          <div>
+            <h1 class="siglc-serif text-xl text-white leading-none">SIG-LC</h1>
+            <p class="siglc-sans text-[11px] text-slate-300 mt-1 tracking-wide">
+              Sistema Integrado de Gestão de Licença Capacitação
+            </p>
+          </div>
+        </div>
+        <button id="btn-reset" class="siglc-sans flex items-center gap-1.5 text-[11px] text-slate-300 border border-slate-600 rounded-sm px-3 py-1.5 hover:bg-white/5 transition-colors">
+          <i class="ph ph-arrow-counter-clockwise"></i> Restaurar dados de exemplo
+        </button>
+      </div>
+
+      <!-- Navegação em estilo "abas de dossiê" -->
+      <div class="max-w-6xl mx-auto px-6 flex flex-wrap gap-1" id="nav-tabs">
+        <!-- Tabs will be rendered here by JS -->
+      </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto px-6 py-8 flex-1 w-full" id="main-content">
+      <!-- Content areas -->
+      
+      <section id="view-dashboard" class="hidden space-y-5">
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3" id="kpi-cards">
+            <!-- Cards rendered by JS -->
+        </div>
+
+        <div class="border rounded-sm bg-white" style="border-color: var(--line)">
+          <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between px-5 py-4 border-b gap-4" style="border-color: var(--line)">
+            <div>
+              <h2 class="siglc-serif text-lg" style="color: var(--navy)" id="dashboard-title">Ocupação de vagas</h2>
+              <p class="siglc-sans text-xs text-slate-500 mt-0.5" id="dashboard-subtitle"></p>
+            </div>
+            <div class="flex items-center gap-1 self-end sm:self-auto">
+              <button id="btn-prev-month" class="p-1.5 border rounded-sm hover:bg-slate-50 transition-colors" style="border-color: var(--line)" aria-label="Mês anterior">
+                <i class="ph ph-caret-left"></i>
+              </button>
+              <span id="current-month-label" class="siglc-sans text-sm font-medium w-32 text-center capitalize" style="color: var(--navy)"></span>
+              <button id="btn-next-month" class="p-1.5 border rounded-sm hover:bg-slate-50 transition-colors" style="border-color: var(--line)" aria-label="Próximo mês">
+                <i class="ph ph-caret-right"></i>
+              </button>
+            </div>
+          </div>
+
+          <div class="p-5">
+            <div class="grid grid-cols-7 gap-1 siglc-sans text-[11px] font-medium text-slate-500 mb-1">
+              <div class="text-center py-1">Dom</div>
+              <div class="text-center py-1">Seg</div>
+              <div class="text-center py-1">Ter</div>
+              <div class="text-center py-1">Qua</div>
+              <div class="text-center py-1">Qui</div>
+              <div class="text-center py-1">Sex</div>
+              <div class="text-center py-1">Sáb</div>
+            </div>
+            <div class="grid grid-cols-7 gap-1" id="calendar-grid">
+              <!-- Calendar cells rendered by JS -->
+            </div>
+
+            <div class="flex flex-wrap gap-4 mt-5 pt-4 border-t siglc-sans text-xs text-slate-600" style="border-color: var(--line)">
+              <div class="flex items-center gap-2">
+                <span class="w-3 h-3 rounded-sm border inline-block" style="background: #E7F3EE; border-color: #BFE0D2"></span>
+                Vagas livres
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="w-3 h-3 rounded-sm border inline-block" style="background: #FDF3E3; border-color: #F2D9A8"></span>
+                Quase lotado (≥80%)
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="w-3 h-3 rounded-sm border inline-block" style="background: #FBEAE9; border-color: #EFC0BC"></span>
+                Limite atingido
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="view-gantt" class="hidden">
+        <div class="border rounded-sm bg-white overflow-x-auto" style="border-color: var(--line)">
+          <div class="px-5 py-4 border-b min-w-[600px]" style="border-color: var(--line)">
+            <h2 class="siglc-serif text-lg" style="color: var(--navy)">Linha do tempo de afastamentos</h2>
+            <p class="siglc-sans text-xs text-slate-500 mt-0.5" id="gantt-subtitle"></p>
+          </div>
+          <div class="p-5 min-w-[600px]">
+            <div id="gantt-content" class="space-y-3">
+              <!-- Gantt rows rendered by JS -->
+            </div>
+            <div class="flex gap-4 mt-5 pt-4 border-t siglc-sans text-xs text-slate-600" style="border-color: var(--line)">
+              <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-sm inline-block" style="background: var(--navy)"></span> Aprovada</div>
+              <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-sm inline-block" style="background: #9AA5AF"></span> Aguardando</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="view-nova" class="hidden">
+        <div class="max-w-xl">
+          <div class="border rounded-sm bg-white" style="border-color: var(--line)">
+            <div class="px-5 py-4 border-b" style="border-color: var(--line)">
+              <h2 class="siglc-serif text-lg" style="color: var(--navy)">Checar disponibilidade</h2>
+              <p class="siglc-sans text-xs text-slate-500 mt-0.5">O Motor de Regras valida elegibilidade, fração mínima, interstício e teto de 5% antes de abrir o processo.</p>
+            </div>
+
+            <form id="form-nova-solicitacao" class="p-5 space-y-4">
+              <div>
+                <label class="siglc-sans block text-xs font-medium text-slate-600 mb-1" for="select-servidor">Servidor</label>
+                <select id="select-servidor" required class="siglc-sans w-full border rounded-sm px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-slate-300 transition-shadow" style="border-color: var(--line)">
+                  <!-- Options rendered by JS -->
+                </select>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label class="siglc-sans block text-xs font-medium text-slate-600 mb-1" for="input-data-inicio">Data início</label>
+                  <input id="input-data-inicio" required type="date" class="siglc-sans w-full border rounded-sm px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-300 transition-shadow" style="border-color: var(--line)">
+                </div>
+                <div>
+                  <label class="siglc-sans block text-xs font-medium text-slate-600 mb-1" for="input-data-fim">Data fim</label>
+                  <input id="input-data-fim" required type="date" class="siglc-sans w-full border rounded-sm px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-300 transition-shadow" style="border-color: var(--line)">
+                </div>
+              </div>
+
+              <button type="submit" class="siglc-sans w-full text-white text-sm font-medium py-2.5 rounded-sm transition-colors hover:opacity-90" style="background: var(--navy)">
+                Checar disponibilidade
+              </button>
+            </form>
+
+            <div id="resultado-validacao" class="px-5 pb-5 hidden">
+                <!-- Result rendered by JS -->
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="view-servidores" class="hidden">
+        <div class="border rounded-sm bg-white" style="border-color: var(--line)">
+          <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between px-5 py-4 border-b gap-3" style="border-color: var(--line)">
+            <h2 class="siglc-serif text-lg" style="color: var(--navy)">Servidores cadastrados</h2>
+            <button id="btn-toggle-form-servidor" class="siglc-sans text-xs font-medium border rounded-sm px-3 py-1.5 hover:bg-slate-50 transition-colors" style="border-color: var(--line); color: var(--navy)">
+              + Novo servidor
+            </button>
+          </div>
+
+          <form id="form-novo-servidor" class="hidden px-5 py-4 border-b grid grid-cols-1 sm:grid-cols-2 gap-3" style="border-color: var(--line); background: #FAFAF9">
+            <input id="new-srv-nome" placeholder="Nome completo" required class="siglc-sans border rounded-sm px-3 py-2 text-sm sm:col-span-2 focus:outline-none focus:ring-2 focus:ring-slate-300" style="border-color: var(--line)">
+            <input id="new-srv-cpf" placeholder="CPF" required class="siglc-sans border rounded-sm px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-300" style="border-color: var(--line)">
+            <input id="new-srv-cargo" placeholder="Cargo" required class="siglc-sans border rounded-sm px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-300" style="border-color: var(--line)">
+            <div>
+              <label class="siglc-sans block text-xs text-slate-500 mb-1" for="new-srv-data">Início do efetivo exercício</label>
+              <input id="new-srv-data" type="date" required class="siglc-sans border rounded-sm px-3 py-2 text-sm w-full focus:outline-none focus:ring-2 focus:ring-slate-300" style="border-color: var(--line)">
+            </div>
+            <div class="flex items-end">
+              <button type="submit" class="siglc-sans w-full text-white text-sm font-medium py-2 rounded-sm transition-colors hover:opacity-90" style="background: var(--navy)">
+                Cadastrar servidor
+              </button>
+            </div>
+          </form>
+
+          <div class="overflow-x-auto">
+            <table class="w-full siglc-sans text-sm min-w-[600px]">
+              <thead>
+                <tr class="text-left text-[11px] uppercase tracking-wide text-slate-500 border-b" style="border-color: var(--line)">
+                  <th class="px-5 py-2 font-medium">Nome</th>
+                  <th class="px-5 py-2 font-medium">Cargo</th>
+                  <th class="px-5 py-2 font-medium">Efetivo exercício desde</th>
+                  <th class="px-5 py-2 font-medium">Elegível a partir de</th>
+                </tr>
+              </thead>
+              <tbody id="tbody-servidores">
+                <!-- Rows rendered by JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section id="view-solicitacoes" class="hidden">
+        <div class="border rounded-sm bg-white" style="border-color: var(--line)">
+          <div class="px-5 py-4 border-b" style="border-color: var(--line)">
+            <h2 class="siglc-serif text-lg" style="color: var(--navy)">Processos de licença</h2>
+            <p class="siglc-sans text-xs text-slate-500 mt-0.5">Aprove ou recuse processos aguardando análise.</p>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full siglc-sans text-sm min-w-[600px]">
+              <thead>
+                <tr class="text-left text-[11px] uppercase tracking-wide text-slate-500 border-b" style="border-color: var(--line)">
+                  <th class="px-5 py-2 font-medium">Protocolo</th>
+                  <th class="px-5 py-2 font-medium">Servidor</th>
+                  <th class="px-5 py-2 font-medium">Período</th>
+                  <th class="px-5 py-2 font-medium">Status</th>
+                  <th class="px-5 py-2 font-medium">Ações</th>
+                </tr>
+              </thead>
+              <tbody id="tbody-solicitacoes">
+                <!-- Rows rendered by JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <footer class="max-w-6xl w-full mx-auto px-6 py-8 mt-auto">
+      <p class="siglc-sans text-[11px] text-slate-400">
+        MVP de demonstração — Motor de Regras executado no navegador, dados salvos no localStorage (sem envio a servidor externo).
+      </p>
+    </footer>
+  </div>
+
+  <script>
+    /* ============================================================================
+       SIG-LC — Sistema Integrado de Gestão de Licença Capacitação
+       Aplicação web única (front-end), com Motor de Regras executado no
+       navegador e persistência via localStorage.
+       ============================================================================ */
+
+    /* ---------------------------------------------------------------------------
+       Constantes legais (Decreto 9.991/2019 e IN 21/2021)
+    --------------------------------------------------------------------------- */
+    const FRACAO_MINIMA_DIAS = 15;
+    const INTERSTICIO_MINIMO_DIAS = 60;
+    const QUINQUENIO_ANOS = 5;
+    const CARGA_HORARIA_MINIMA_SEMANAL = 30;
+    const STORAGE_KEY = "siglc:estado_html";
+
+    /* ---------------------------------------------------------------------------
+       Utilidades de data e gerais
+    --------------------------------------------------------------------------- */
+    const parseISO = (s) => new Date(s + "T00:00:00Z");
+    const toISO = (d) => d.toISOString().slice(0, 10);
+    const diffDias = (a, b) => Math.round((a.getTime() - b.getTime()) / 86400000);
+    const addAnos = (d, anos) => {
+      const nd = new Date(d.getTime());
+      nd.setUTCFullYear(nd.getUTCFullYear() + anos);
+      return nd;
+    };
+    const eachDay = (start, end) => {
+      const dias = [];
+      let cur = new Date(start.getTime());
+      while (cur <= end) {
+        dias.push(new Date(cur.getTime()));
+        cur = new Date(cur.getTime() + 86400000);
+      }
+      return dias;
+    };
+    const fmtBR = (iso) => {
+      if(!iso) return "";
+      const [y, m, d] = iso.split("-");
+      return `${d}/${m}/${y}`;
+    };
+    const generateId = () => `id-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+
+    // Tab Configuration
+    const TABS = [
+      { id: "dashboard", label: "Dashboard", icon: "ph-squares-four" },
+      { id: "gantt", label: "Linha do tempo", icon: "ph-calendar-blank" },
+      { id: "nova", label: "Nova solicitação", icon: "ph-file-plus" },
+      { id: "servidores", label: "Servidores", icon: "ph-users" },
+      { id: "solicitacoes", label: "Processos", icon: "ph-clipboard-text" },
+    ];
+
+    // Status Metadata
+    const STATUS_META = {
+      RASCUNHO: { label: "Rascunho", bg: "#EEF0F2", fg: "#4B5A66" },
+      AGUARDANDO: { label: "Aguardando", bg: "#FDF3E3", fg: "var(--amber)" },
+      APROVADA: { label: "Aprovada", bg: "#E7F3EE", fg: "var(--emerald)" },
+      RECUSADA: { label: "Recusada", bg: "#FBEAE9", fg: "var(--red)" },
+    };
+
+    /* ---------------------------------------------------------------------------
+       Motor de Regras
+    --------------------------------------------------------------------------- */
+    function validarElegibilidade(dataInicioEfetivo, dataInicioSolicitada) {
+      const dataElegibilidade = addAnos(dataInicioEfetivo, QUINQUENIO_ANOS);
+      if (dataInicioSolicitada < dataElegibilidade) {
+        return {
+          valido: false,
+          regra: "ELEGIBILIDADE_QUINQUENIO",
+          mensagem: `Servidor só completa o quinquênio em ${fmtBR(toISO(dataElegibilidade))}.`,
+        };
+      }
+      return { valido: true, regra: "ELEGIBILIDADE_QUINQUENIO" };
+    }
+
+    function validarFracaoMinima(dataInicio, dataFim) {
+      const dias = diffDias(dataFim, dataInicio) + 1;
+      if (dias < FRACAO_MINIMA_DIAS) {
+        return {
+          valido: false,
+          regra: "FRACAO_MINIMA",
+          mensagem: `A parcela tem ${dias} dia(s); o mínimo legal é ${FRACAO_MINIMA_DIAS} dias.`,
+        };
+      }
+      return { valido: true, regra: "FRACAO_MINIMA" };
+    }
+
+    function validarIntersticio(novaInicio, novaFim, parcelasAnteriores) {
+      for (const p of parcelasAnteriores) {
+        const gapAntes = diffDias(novaInicio, p.dataFim);
+        const gapDepois = diffDias(p.dataInicio, novaFim);
+        const gap = Math.max(gapAntes, gapDepois);
+        if (gap < INTERSTICIO_MINIMO_DIAS) {
+          return {
+            valido: false,
+            regra: "INTERSTICIO_MINIMO",
+            mensagem: `Intervalo de ${gap} dia(s) da licença de ${fmtBR(toISO(p.dataInicio))} a ${fmtBR(toISO(p.dataFim))}; mínimo exigido é ${INTERSTICIO_MINIMO_DIAS} dias.`,
+          };
+        }
+      }
+      return { valido: true, regra: "INTERSTICIO_MINIMO" };
+    }
+
+    function validarTeto(dataInicio, dataFim, ocupacaoPorDia, limite) {
+      for (const dia of eachDay(dataInicio, dataFim)) {
+        const chave = toISO(dia);
+        const atual = ocupacaoPorDia.get(chave) ?? 0;
+        if (atual + 1 > limite) {
+          return {
+            valido: false,
+            regra: "TETO_CONCORRENCIA",
+            mensagem: `Em ${fmtBR(chave)} o afastamento atingiria ${atual + 1} servidores; limite é ${limite} (5% do efetivo).`,
+          };
+        }
+      }
+      return { valido: true, regra: "TETO_CONCORRENCIA" };
+    }
+
+    function validarSolicitacaoCompleta(input, ctx) {
+      const validacoes = [
+        validarElegibilidade(ctx.dataInicioEfetivoExercicio, input.dataInicio),
+        validarFracaoMinima(input.dataInicio, input.dataFim),
+        validarIntersticio(input.dataInicio, input.dataFim, ctx.parcelasAnteriores),
+        validarTeto(input.dataInicio, input.dataFim, ctx.ocupacaoPorDia, ctx.limiteAfastamentosDia),
+      ];
+      return validacoes.find((v) => !v.valido) ?? { valido: true, regra: "TODAS" };
+    }
+
+    /* ---------------------------------------------------------------------------
+       Derivação de ocupação
+    --------------------------------------------------------------------------- */
+    function calcularOcupacaoPorDia(stateObj, lotacaoId, janelaInicio, janelaFim) {
+      const mapa = new Map();
+      for (const s of stateObj.solicitacoes) {
+        if (!["AGUARDANDO", "APROVADA"].includes(s.statusWorkflow)) continue;
+        const servidor = stateObj.servidores.find((sv) => sv.id === s.servidorId);
+        if (!servidor || servidor.lotacaoId !== lotacaoId) continue;
+        for (const p of s.parcelas) {
+          const pIni = parseISO(p.dataInicio);
+          const pFim = parseISO(p.dataFim);
+          if (pFim < janelaInicio || pIni > janelaFim) continue;
+          const ini = pIni > janelaInicio ? pIni : janelaInicio;
+          const fim = pFim < janelaFim ? pFim : janelaFim;
+          for (const dia of eachDay(ini, fim)) {
+            const chave = toISO(dia);
+            mapa.set(chave, (mapa.get(chave) ?? 0) + 1);
+          }
+        }
+      }
+      return mapa;
+    }
+
+    function parcelasAnterioresDoServidor(stateObj, servidorId) {
+      return stateObj.solicitacoes
+        .filter((s) => s.servidorId === servidorId && ["AGUARDANDO", "APROVADA"].includes(s.statusWorkflow))
+        .flatMap((s) => s.parcelas.map((p) => ({ dataInicio: parseISO(p.dataInicio), dataFim: parseISO(p.dataFim) })));
+    }
+
+    /* ---------------------------------------------------------------------------
+       Dados iniciais e Estado Global
+    --------------------------------------------------------------------------- */
+    function getEstadoInicial() {
+      const lotacaoId = "lot-1";
+      const servidores = [
+        { id: "srv-1", nome: "Ana Beatriz Souza", cpf: "111.111.111-11", cargo: "Analista Administrativo", lotacaoId, dataInicioEfetivoExercicio: "2015-03-01" },
+        { id: "srv-2", nome: "Carlos Eduardo Lima", cpf: "222.222.222-22", cargo: "Técnico em Contabilidade", lotacaoId, dataInicioEfetivoExercicio: "2018-08-15" },
+        { id: "srv-3", nome: "Fernanda Alves Costa", cpf: "333.333.333-33", cargo: "Auditor Federal", lotacaoId, dataInicioEfetivoExercicio: "2012-01-10" },
+        { id: "srv-4", nome: "João Pedro Martins", cpf: "444.444.444-44", cargo: "Analista de TI", lotacaoId, dataInicioEfetivoExercicio: "2023-05-01" },
+        { id: "srv-5", nome: "Marina Ribeiro Dias", cpf: "555.555.555-55", cargo: "Assistente Administrativo", lotacaoId, dataInicioEfetivoExercicio: "2016-11-20" },
+      ];
+
+      const solicitacoes = [
+        {
+          id: "sol-1",
+          servidorId: "srv-1",
+          statusWorkflow: "APROVADA",
+          dataRegistro: "2026-06-02",
+          parcelas: [{ id: generateId(), dataInicio: "2026-07-01", dataFim: "2026-07-20", cargaHorariaSemanal: 30, statusComprovacao: "PENDENTE" }],
+        },
+        {
+          id: "sol-2",
+          servidorId: "srv-3",
+          statusWorkflow: "APROVADA",
+          dataRegistro: "2026-06-10",
+          parcelas: [{ id: generateId(), dataInicio: "2026-07-15", dataFim: "2026-08-05", cargaHorariaSemanal: 30, statusComprovacao: "PENDENTE" }],
+        },
+        {
+          id: "sol-3",
+          servidorId: "srv-5",
+          statusWorkflow: "AGUARDANDO",
+          dataRegistro: "2026-07-05",
+          parcelas: [{ id: generateId(), dataInicio: "2026-08-10", dataFim: "2026-08-28", cargaHorariaSemanal: 30, statusComprovacao: "PENDENTE" }],
+        },
+      ];
+
+      return {
+        lotacoes: [{ id: lotacaoId, nomeOrgao: "Órgão Público Federal — Exemplo", totalServidores: 1000, percentualLimite: 5, limiteAfastamentosDia: 50 }],
+        servidores,
+        solicitacoes,
+      };
+    }
+
+    let appState = null;
+    let currentTab = "dashboard";
+
+    // Dashboard State
+    let dashboardAno = 2026;
+    let dashboardMes = 7;
+
+    // Nova Solicitacao Form State
+    let resultNovaSolicitacao = null;
+    let pendingSolicitacao = null;
+
+    /* ---------------------------------------------------------------------------
+       Funções de Renderização UI
+    --------------------------------------------------------------------------- */
+
+    function renderTabs() {
+      const container = document.getElementById('nav-tabs');
+      container.innerHTML = '';
+      TABS.forEach(tab => {
+        const isActive = currentTab === tab.id;
+        const btn = document.createElement('button');
+        btn.className = `siglc-sans flex items-center gap-1.5 px-4 py-2.5 text-[13px] font-medium rounded-t-sm transition-colors`;
+        btn.style.background = isActive ? "var(--paper)" : "transparent";
+        btn.style.color = isActive ? "var(--navy)" : "#B9C2CB";
+        btn.innerHTML = `<i class="ph ${tab.icon} text-sm"></i> ${tab.label}`;
+        btn.onclick = () => switchTab(tab.id);
+        container.appendChild(btn);
+      });
+    }
+
+    function switchTab(tabId) {
+      currentTab = tabId;
+      renderTabs();
+      
+      // Hide all views
+      TABS.forEach(t => document.getElementById(`view-${t.id}`).classList.add('hidden'));
+      // Show active view
+      document.getElementById(`view-${tabId}`).classList.remove('hidden');
+
+      // Re-render view specific content
+      updateViewContent();
+    }
+
+    function updateViewContent() {
+      if(!appState) return;
+
+      if(currentTab === 'dashboard') renderDashboard();
+      if(currentTab === 'gantt') renderGantt();
+      if(currentTab === 'nova') renderNovaSolicitacao();
+      if(currentTab === 'servidores') renderServidores();
+      if(currentTab === 'solicitacoes') renderSolicitacoes();
+    }
+
+    /* --- View: Dashboard --- */
+    function renderDashboard() {
+      const lotacao = appState.lotacoes[0];
+      const janelaInicio = new Date(Date.UTC(dashboardAno, dashboardMes - 1, 1));
+      const janelaFim = new Date(Date.UTC(dashboardAno, dashboardMes, 0));
+      const ocupacaoPorDia = calcularOcupacaoPorDia(appState, lotacao.id, janelaInicio, janelaFim);
+
+      // KPIs
+      const hojeISO = toISO(new Date());
+      const afastadosHoje = ocupacaoPorDia.get(hojeISO) ?? 0;
+      const aguardando = appState.solicitacoes.filter((s) => s.statusWorkflow === "AGUARDANDO").length;
+      const comprovacoesPendentes = appState.solicitacoes
+        .flatMap((s) => s.parcelas)
+        .filter((p) => p.statusComprovacao === "PENDENTE" && parseISO(p.dataFim) < new Date()).length;
+
+      const kpiContainer = document.getElementById('kpi-cards');
+      kpiContainer.innerHTML = `
+        ${createKpiCard("Afastados hoje", `${afastadosHoje} / ${lotacao.limiteAfastamentosDia}`, "navy")}
+        ${createKpiCard("Processos aguardando análise", aguardando, "amber")}
+        ${createKpiCard("Comprovações vencidas pendentes", comprovacoesPendentes, comprovacoesPendentes > 0 ? "red" : "emerald")}
+      `;
+
+      // Header
+      document.getElementById('dashboard-title').textContent = `Ocupação de vagas — ${lotacao.nomeOrgao}`;
+      document.getElementById('dashboard-subtitle').textContent = `Teto legal: ${lotacao.percentualLimite}% do efetivo (${lotacao.limiteAfastamentosDia} servidores/dia)`;
+      
+      // Intl formatter requires real date to not be off-by-one depending on local timezone, using UTC approach
+      const monthNames = ["janeiro", "fevereiro", "março", "abril", "maio", "junho", "julho", "agosto", "setembro", "outubro", "novembro", "dezembro"];
+      document.getElementById('current-month-label').textContent = `${monthNames[dashboardMes-1]} de ${dashboardAno}`;
+
+      // Calendar Grid
+      const primeiroDiaSemana = janelaInicio.getUTCDay();
+      const totalDias = janelaFim.getUTCDate();
+      const gridContainer = document.getElementById('calendar-grid');
+      gridContainer.innerHTML = '';
+
+      // Empty cells before start
+      for(let i=0; i<primeiroDiaSemana; i++) {
+        gridContainer.appendChild(document.createElement('div'));
+      }
+
+      for(let i=1; i<=totalDias; i++) {
+        const iso = toISO(new Date(Date.UTC(dashboardAno, dashboardMes - 1, i)));
+        const ocupacao = ocupacaoPorDia.get(iso) ?? 0;
+        const pct = ocupacao / lotacao.limiteAfastamentosDia;
+        const nivel = pct >= 1 ? "limite" : pct >= 0.8 ? "quase" : "livre";
+        
+        let bg, fg, bd;
+        if(nivel === 'livre') { bg = "#E7F3EE"; fg = "var(--emerald)"; bd = "#BFE0D2"; }
+        else if(nivel === 'quase') { bg = "#FDF3E3"; fg = "var(--amber)"; bd = "#F2D9A8"; }
+        else { bg = "#FBEAE9"; fg = "var(--red)"; bd = "#EFC0BC"; }
+
+        const cell = document.createElement('div');
+        cell.title = `${ocupacao}/${lotacao.limiteAfastamentosDia} servidores afastados`;
+        cell.className = "siglc-sans aspect-square rounded-sm border flex flex-col items-center justify-center text-[11px] transition-transform hover:scale-105 cursor-default";
+        cell.style.background = bg;
+        cell.style.color = fg;
+        cell.style.borderColor = bd;
+        
+        cell.innerHTML = `
+          <span class="font-semibold">${i}</span>
+          <span class="text-[9px] opacity-80">${ocupacao}/${lotacao.limiteAfastamentosDia}</span>
+        `;
+        gridContainer.appendChild(cell);
+      }
+    }
+
+    function createKpiCard(label, valor, tom) {
+      let cor = "var(--navy)";
+      if(tom === "amber") cor = "var(--amber)";
+      if(tom === "red") cor = "var(--red)";
+      if(tom === "emerald") cor = "var(--emerald)";
+
+      return `
+        <div class="border rounded-sm bg-white px-4 py-3" style="border-color: var(--line)">
+          <div class="siglc-sans text-[11px] uppercase tracking-wide text-slate-500">${label}</div>
+          <div class="siglc-serif text-2xl mt-1" style="color: ${cor}">${valor}</div>
+        </div>
+      `;
+    }
+
+    function changeDashboardMonth(delta) {
+      dashboardMes += delta;
+      if (dashboardMes > 12) { dashboardMes = 1; dashboardAno++; }
+      else if (dashboardMes < 1) { dashboardMes = 12; dashboardAno--; }
+      renderDashboard();
+    }
+
+    /* --- View: Gantt --- */
+    function renderGantt() {
+      const janelaInicio = new Date(Date.UTC(2026, 5, 15)); // 15 Jun 2026
+      const janelaFim = new Date(Date.UTC(2026, 8, 15)); // 15 Sep 2026
+      const totalDias = diffDias(janelaFim, janelaInicio);
+
+      document.getElementById('gantt-subtitle').textContent = `Janela: ${fmtBR(toISO(janelaInicio))} a ${fmtBR(toISO(janelaFim))} — identifique quando uma vaga é liberada`;
+
+      const linhas = appState.servidores
+        .map((srv) => {
+          const parcelas = appState.solicitacoes
+            .filter((s) => s.servidorId === srv.id && ["AGUARDANDO", "APROVADA"].includes(s.statusWorkflow))
+            .flatMap((s) => s.parcelas.map((p) => ({ ...p, status: s.statusWorkflow })));
+          return { srv, parcelas };
+        })
+        .filter((l) => l.parcelas.length > 0);
+
+      const container = document.getElementById('gantt-content');
+      container.innerHTML = '';
+
+      if (linhas.length === 0) {
+        container.innerHTML = `<p class="siglc-sans text-sm text-slate-500">Nenhum afastamento ativo no período. Abra uma solicitação na aba "Nova Solicitação".</p>`;
+        return;
+      }
+
+      linhas.forEach(({ srv, parcelas }) => {
+        const row = document.createElement('div');
+        row.className = "flex items-center gap-3";
+        
+        let barsHtml = '';
+        parcelas.forEach(p => {
+          const ini = parseISO(p.dataInicio);
+          const fim = parseISO(p.dataFim);
+          const offset = Math.max(0, diffDias(ini, janelaInicio));
+          const duracao = diffDias(fim, ini) + 1;
+          
+          const left = `${(offset / totalDias) * 100}%`;
+          const width = `${(duracao / totalDias) * 100}%`;
+          const bg = p.status === "APROVADA" ? "var(--navy)" : "#9AA5AF";
+          const title = `${fmtBR(p.dataInicio)} a ${fmtBR(p.dataFim)} — ${STATUS_META[p.status].label}`;
+
+          // Only render if it falls within the window at least partially
+          if(offset <= totalDias && (offset+duracao) >= 0) {
+             barsHtml += `<div title="${title}" class="absolute top-0 h-full rounded-sm transition-all hover:brightness-110 cursor-help" style="left: ${left}; width: ${width}; background: ${bg}"></div>`;
+          }
+        });
+
+        row.innerHTML = `
+          <div class="siglc-sans w-40 shrink-0 text-sm text-slate-700 truncate" title="${srv.nome}">${srv.nome}</div>
+          <div class="relative flex-1 h-6 rounded-sm overflow-hidden" style="background: #EEF0F2">
+            ${barsHtml}
+          </div>
+        `;
+        container.appendChild(row);
+      });
+    }
+
+    /* --- View: Nova Solicitação --- */
+    function renderNovaSolicitacao() {
+      const select = document.getElementById('select-servidor');
+      const currentVal = select.value;
+      select.innerHTML = '';
+      appState.servidores.forEach(s => {
+        const opt = document.createElement('option');
+        opt.value = s.id;
+        opt.textContent = `${s.nome} — ${s.cargo}`;
+        select.appendChild(opt);
+      });
+      if(currentVal && appState.servidores.find(s=>s.id === currentVal)) {
+        select.value = currentVal;
+      } else if(appState.servidores.length > 0) {
+        select.value = appState.servidores[0].id;
+      }
+
+      renderResultadoNovaSolicitacao();
+    }
+
+    function renderResultadoNovaSolicitacao() {
+      const container = document.getElementById('resultado-validacao');
+      if (!resultNovaSolicitacao) {
+        container.classList.add('hidden');
+        return;
+      }
+      container.classList.remove('hidden');
+
+      if (resultNovaSolicitacao.valido) {
+        container.innerHTML = `
+          <div class="rounded-sm border px-3 py-3 text-sm flex items-start gap-2" style="border-color: #BFE0D2; background: #E7F3EE; color: var(--emerald)">
+            <i class="ph-fill ph-check-circle text-lg shrink-0 mt-0.5"></i>
+            <div class="flex-1">
+              <p class="siglc-sans font-medium">Datas aprovadas pelo Motor de Regras.</p>
+              <button id="btn-confirm-nova" class="siglc-sans mt-2 text-xs font-medium underline underline-offset-2 hover:opacity-80 transition-opacity">
+                Confirmar abertura do processo
+              </button>
+            </div>
+          </div>
+        `;
+        document.getElementById('btn-confirm-nova').onclick = confirmarNovaSolicitacao;
+      } else {
+        container.innerHTML = `
+          <div class="rounded-sm border px-3 py-3 text-sm flex items-start gap-2" style="border-color: #EFC0BC; background: #FBEAE9; color: var(--red)">
+            <i class="ph-fill ph-warning-circle text-lg shrink-0 mt-0.5"></i>
+            <div>
+              <p class="siglc-sans font-medium siglc-mono text-xs mb-0.5">${resultNovaSolicitacao.regra}</p>
+              <p class="siglc-sans">${resultNovaSolicitacao.mensagem}</p>
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    function handleFormNovaSolicitacao(e) {
+      e.preventDefault();
+      const servidorId = document.getElementById('select-servidor').value;
+      const dataInicio = document.getElementById('input-data-inicio').value;
+      const dataFim = document.getElementById('input-data-fim').value;
+
+      const servidor = appState.servidores.find(s => s.id === servidorId);
+      if (!servidor || !dataInicio || !dataFim) return;
+
+      const ini = parseISO(dataInicio);
+      const fim = parseISO(dataFim);
+      if (fim <= ini) {
+        resultNovaSolicitacao = { valido: false, regra: "INTERVALO_INVALIDO", mensagem: "A data fim deve ser posterior à data início." };
+        renderResultadoNovaSolicitacao();
+        return;
+      }
+
+      const lotacao = appState.lotacoes[0];
+      const ocupacaoPorDia = calcularOcupacaoPorDia(appState, lotacao.id, ini, fim);
+      
+      resultNovaSolicitacao = validarSolicitacaoCompleta(
+        { dataInicio: ini, dataFim: fim },
+        {
+          dataInicioEfetivoExercicio: parseISO(servidor.dataInicioEfetivoExercicio),
+          parcelasAnteriores: parcelasAnterioresDoServidor(appState, servidorId),
+          ocupacaoPorDia,
+          limiteAfastamentosDia: lotacao.limiteAfastamentosDia,
+        }
+      );
+
+      pendingSolicitacao = { servidorId, dataInicio, dataFim };
+      renderResultadoNovaSolicitacao();
+    }
+
+    function confirmarNovaSolicitacao() {
+      if(!pendingSolicitacao) return;
+      
+      appState.solicitacoes.push({
+        id: generateId(),
+        servidorId: pendingSolicitacao.servidorId,
+        statusWorkflow: "AGUARDANDO",
+        dataRegistro: toISO(new Date()),
+        parcelas: [{ 
+          id: generateId(), 
+          dataInicio: pendingSolicitacao.dataInicio, 
+          dataFim: pendingSolicitacao.dataFim, 
+          cargaHorariaSemanal: CARGA_HORARIA_MINIMA_SEMANAL, 
+          statusComprovacao: "PENDENTE" 
+        }],
+      });
+
+      saveState();
+      
+      // Reset form
+      resultNovaSolicitacao = null;
+      pendingSolicitacao = null;
+      document.getElementById('input-data-inicio').value = '';
+      document.getElementById('input-data-fim').value = '';
+      renderResultadoNovaSolicitacao();
+      
+      // Optional: switch to process view to show it
+      switchTab('solicitacoes');
+    }
+
+    /* --- View: Servidores --- */
+    let formServidorVisible = false;
+    
+    function toggleFormServidor() {
+      formServidorVisible = !formServidorVisible;
+      const form = document.getElementById('form-novo-servidor');
+      const btn = document.getElementById('btn-toggle-form-servidor');
+      if(formServidorVisible) {
+        form.classList.remove('hidden');
+        btn.textContent = "Cancelar";
+      } else {
+        form.classList.add('hidden');
+        btn.textContent = "+ Novo servidor";
+      }
+    }
+
+    function handleFormNovoServidor(e) {
+      e.preventDefault();
+      const nome = document.getElementById('new-srv-nome').value;
+      const cpf = document.getElementById('new-srv-cpf').value;
+      const cargo = document.getElementById('new-srv-cargo').value;
+      const dataInicio = document.getElementById('new-srv-data').value;
+
+      if(!nome || !cpf || !cargo || !dataInicio) return;
+
+      appState.servidores.push({
+        id: generateId(),
+        lotacaoId: appState.lotacoes[0].id,
+        nome, cpf, cargo, dataInicioEfetivoExercicio: dataInicio
+      });
+
+      saveState();
+      
+      // Reset
+      document.getElementById('new-srv-nome').value = '';
+      document.getElementById('new-srv-cpf').value = '';
+      document.getElementById('new-srv-cargo').value = '';
+      document.getElementById('new-srv-data').value = '';
+      toggleFormServidor();
+      renderServidores();
+    }
+
+    function renderServidores() {
+      const tbody = document.getElementById('tbody-servidores');
+      tbody.innerHTML = '';
+
+      appState.servidores.forEach(s => {
+        const elegivel = toISO(addAnos(parseISO(s.dataInicioEfetivoExercicio), QUINQUENIO_ANOS));
+        const jaElegivel = parseISO(elegivel) <= new Date();
+        const colorClass = jaElegivel ? "text-[var(--emerald)]" : "text-[var(--amber)]";
+
+        const tr = document.createElement('tr');
+        tr.className = "border-b last:border-0 hover:bg-slate-50/50";
+        tr.style.borderColor = "var(--line)";
+        tr.innerHTML = `
+          <td class="px-5 py-2.5 text-slate-800">${s.nome}</td>
+          <td class="px-5 py-2.5 text-slate-600">${s.cargo}</td>
+          <td class="px-5 py-2.5 siglc-mono text-xs text-slate-600">${fmtBR(s.dataInicioEfetivoExercicio)}</td>
+          <td class="px-5 py-2.5 siglc-mono text-xs ${colorClass}">${fmtBR(elegivel)}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    /* --- View: Solicitações --- */
+    function renderSolicitacoes() {
+      const tbody = document.getElementById('tbody-solicitacoes');
+      tbody.innerHTML = '';
+
+      // Reverse copy
+      const processos = [...appState.solicitacoes].reverse();
+
+      processos.forEach(s => {
+        const servidor = appState.servidores.find((sv) => sv.id === s.servidorId);
+        const p = s.parcelas[0];
+        
+        // Status badge
+        const m = STATUS_META[s.statusWorkflow] ?? STATUS_META.RASCUNHO;
+        const badgeHtml = `<span class="siglc-sans inline-block rounded-sm px-2 py-0.5 text-[11px] font-medium" style="background: ${m.bg}; color: ${m.fg}">${m.label}</span>`;
+
+        // Protocol
+        const protocoloNumero = s.id.slice(-6).toUpperCase();
+        const protocoloHtml = `<span class="siglc-mono inline-flex items-center gap-1 border px-2 py-0.5 text-[11px] tracking-wide" style="border-color: var(--gold); color: var(--gold); transform: rotate(-1.5deg); background: #FBF8F1"><i class="ph ph-stamp text-[11px]"></i> PROC. Nº ${protocoloNumero}</span>`;
+
+        // Actions
+        let actionsHtml = `<span class="text-xs text-slate-400">—</span>`;
+        if (s.statusWorkflow === "AGUARDANDO") {
+          actionsHtml = `
+            <div class="flex gap-2">
+              <button onclick="transicionarStatus('${s.id}', 'APROVADA')" class="p-1.5 rounded-sm hover:bg-slate-50 border transition-colors" style="border-color: #BFE0D2; color: var(--emerald)" title="Aprovar">
+                <i class="ph ph-check font-bold"></i>
+              </button>
+              <button onclick="transicionarStatus('${s.id}', 'RECUSADA')" class="p-1.5 rounded-sm hover:bg-slate-50 border transition-colors" style="border-color: #EFC0BC; color: var(--red)" title="Recusar">
+                <i class="ph ph-x font-bold"></i>
+              </button>
+            </div>
+          `;
+        }
+
+        const tr = document.createElement('tr');
+        tr.className = "border-b last:border-0 align-middle hover:bg-slate-50/50";
+        tr.style.borderColor = "var(--line)";
+        tr.innerHTML = `
+          <td class="px-5 py-2.5">${protocoloHtml}</td>
+          <td class="px-5 py-2.5 text-slate-800">${servidor?.nome ?? "—"}</td>
+          <td class="px-5 py-2.5 siglc-mono text-xs text-slate-600">${fmtBR(p.dataInicio)} – ${fmtBR(p.dataFim)}</td>
+          <td class="px-5 py-2.5">${badgeHtml}</td>
+          <td class="px-5 py-2.5">${actionsHtml}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    window.transicionarStatus = function(solicitacaoId, novoStatus) {
+      const idx = appState.solicitacoes.findIndex(s => s.id === solicitacaoId);
+      if(idx !== -1) {
+        appState.solicitacoes[idx].statusWorkflow = novoStatus;
+        saveState();
+        renderSolicitacoes(); // Update view
+      }
+    };
+
+    /* ---------------------------------------------------------------------------
+       Persistência e Inicialização
+    --------------------------------------------------------------------------- */
+    function loadState() {
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) return JSON.parse(saved);
+      } catch(e) {
+        console.warn("Could not read from localStorage");
+      }
+      return null;
+    }
+
+    function saveState() {
+      if(!appState) return;
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+      } catch(e) {
+        console.warn("Could not write to localStorage");
+      }
+    }
+
+    function resetApp() {
+      appState = getEstadoInicial();
+      saveState();
+      switchTab('dashboard'); // Re-renders current view
+    }
+
+    // Attach event listeners
+    document.addEventListener("DOMContentLoaded", () => {
+      
+      // Load Data
+      appState = loadState() || getEstadoInicial();
+
+      // Bind global events
+      document.getElementById('btn-reset').addEventListener('click', resetApp);
+      
+      document.getElementById('btn-prev-month').addEventListener('click', () => changeDashboardMonth(-1));
+      document.getElementById('btn-next-month').addEventListener('click', () => changeDashboardMonth(1));
+      
+      document.getElementById('form-nova-solicitacao').addEventListener('submit', handleFormNovaSolicitacao);
+      
+      // Limpar erro ao mudar inputs
+      ['select-servidor', 'input-data-inicio', 'input-data-fim'].forEach(id => {
+        document.getElementById(id).addEventListener('change', () => {
+          resultNovaSolicitacao = null;
+          renderResultadoNovaSolicitacao();
+        });
+      });
+
+      document.getElementById('btn-toggle-form-servidor').addEventListener('click', toggleFormServidor);
+      document.getElementById('form-novo-servidor').addEventListener('submit', handleFormNovoServidor);
+
+      // Initial Render
+      renderTabs();
+      switchTab('dashboard');
+    });
+
+  </script>
+</body>
+</html>
