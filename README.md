@@ -2,7 +2,7 @@
 
 Backoffice para automatizar a concessão de **Licença Capacitação**, conforme o **Decreto nº 9.991/2019** e a **Instrução Normativa nº 21/2021**.
 
-> Consulte o arquivo **`docs/ARQUITETURA.md`** para informações detalhadas sobre a arquitetura e o design do sistema.
+
 
 ---
 
